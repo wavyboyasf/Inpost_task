@@ -215,32 +215,7 @@
         .pill-red    { background: rgba(252,129,129,0.15); color: var(--accent-red);  border: 1px solid rgba(252,129,129,0.3); }
         .pill-gray   { background: rgba(160,174,192,0.12); color: var(--text-secondary); border: 1px solid rgba(160,174,192,0.2); }
 
-        /* ── Convenience score bar ─────────────────── */
-        .score-bar-wrap {
-            margin-top: 8px;
-        }
-
-        .score-label {
-            font-size: 0.68rem;
-            color: var(--text-secondary);
-            margin-bottom: 3px;
-        }
-
-        .score-bar-bg {
-            background: rgba(255,255,255,0.07);
-            border-radius: 4px;
-            height: 4px;
-            overflow: hidden;
-        }
-
-        .score-bar-fill {
-            height: 100%;
-            border-radius: 4px;
-            background: linear-gradient(90deg, var(--accent-green), var(--inpost-yellow));
-            transition: width 0.4s ease;
-        }
-
-        /* ── No alternatives / error ───────────────── */
+/* ── No alternatives / error ───────────────── */
         .no-alternatives {
             text-align: center;
             padding: 32px 16px;
@@ -453,28 +428,12 @@
         else if (alt.location_type === 'Outdoor')
             pills.push(`<span class="pill pill-gray">🌤 Outdoor</span>`);
 
-        if (alt.transit_stops > 0) {
-            const cls = alt.transit_stops >= 3 ? 'pill-blue' : 'pill-gray';
-            pills.push(`<span class="pill ${cls}">🚌 ${alt.transit_stops} przyst.</span>`);
-        }
-
         if (alt.air_index_level && AIR_LABELS[alt.air_index_level]) {
             const a = AIR_LABELS[alt.air_index_level];
             pills.push(`<span class="pill ${a.cls}">💨 ${a.label}</span>`);
         }
 
         return pills.length ? `<div class="badge-row">${pills.join('')}</div>` : '';
-    }
-
-    function buildScoreBar(alt) {
-        // Normalize convenience_score to a 0-100 bar (0 min = 100%, 10 min = 0%)
-        const score = alt.convenience_score ?? alt.walking_time_min ?? 10;
-        const pct = Math.max(0, Math.round((1 - score / 10) * 100));
-        return `
-            <div class="score-bar-wrap">
-                <div class="score-label">Wygoda dojścia: ${pct}%</div>
-                <div class="score-bar-bg"><div class="score-bar-fill" style="width:${pct}%"></div></div>
-            </div>`;
     }
 
     // ── Render Alternatives Panel ──────────────────────────────────
@@ -517,7 +476,6 @@
                             <div class="alt-address">${alt.address}${alt.city ? ', ' + alt.city : ''}</div>
                             ${distLabel ? `<div class="alt-distance">${distLabel}</div>` : ''}
                             ${buildBadges(alt)}
-                            ${buildScoreBar(alt)}
                         </div>
                     </div>`;
 

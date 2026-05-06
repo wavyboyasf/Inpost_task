@@ -9,7 +9,6 @@ Each alternative is enriched with a transit accessibility score from
 the OpenStreetMap Overpass API (bus/tram/metro stops within 400 m).
 """
 
-import asyncio
 from contextlib import asynccontextmanager
 
 import httpx
@@ -24,7 +23,6 @@ from services.inpost import (
     simplify_locker,
 )
 from services.routing import get_walking_route, haversine_distance_m
-from services.overpass import transit_stops_nearby
 
 # Only show alternatives reachable within these thresholds
 MAX_STRAIGHT_LINE_M = 1_200   # skip routing entirely if farther than this
@@ -127,10 +125,7 @@ async def get_alternatives(locker_name: str):
             if straight_dist > MAX_STRAIGHT_LINE_M:
                 continue
 
-            # Walking route + transit score in parallel
-            route_task = get_walking_route(client, selected_lat, selected_lon, alt_lat, alt_lon)
-            transit_task = transit_stops_nearby(client, alt_lat, alt_lon)
-            route, transit_stops = await asyncio.gather(route_task, transit_task)
+            route = await get_walking_route(client, selected_lat, selected_lon, alt_lat, alt_lon)
 
             if not route or route["duration_min"] > MAX_WALKING_TIME_MIN:
                 continue
@@ -139,18 +134,10 @@ async def get_alternatives(locker_name: str):
             alt_info["walking_distance_m"] = route["distance_m"]
             alt_info["walking_time_min"] = route["duration_min"]
             alt_info["route_geometry"] = route["geometry"]
-            alt_info["transit_stops"] = transit_stops
-
-            # Convenience score: lower = better
-            # Each nearby transit stop shaves 0.5 min off the effective walk time
-            alt_info["convenience_score"] = round(
-                route["duration_min"] - min(transit_stops, 6) * 0.5, 1
-            )
 
             alternatives.append(alt_info)
 
-    # Sort by convenience (walk time adjusted for transit access)
-    alternatives.sort(key=lambda a: a.get("convenience_score") or 999)
+    alternatives.sort(key=lambda a: a.get("walking_time_min") or 999)
 
     return {
         "selected": simplify_locker(selected),
