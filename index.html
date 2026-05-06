@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InPost Points Map</title>
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #ffcc00; /* InPost Yellow */
+            --bg-color: #f4f4f5;
+            --text-color: #333;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            background-color: white;
+            padding: 1rem 2rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 1000;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        h1 span {
+            background-color: var(--primary-color);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+
+        #map {
+            flex-grow: 1;
+            width: 100%;
+        }
+
+        .leaflet-popup-content-wrapper {
+            border-radius: 12px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .leaflet-popup-content {
+            margin: 16px;
+        }
+
+        .popup-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 4px;
+            color: #111;
+        }
+
+        .popup-desc {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 8px;
+        }
+        
+        .loading-overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(255,255,255,0.8);
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(4px);
+            transition: opacity 0.3s ease;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Mapa Punktów InPost <span>API Demo</span></h1>
+        <div id="stats">Ładowanie danych...</div>
+    </header>
+
+    <div id="loading" class="loading-overlay">
+        <div class="spinner"></div>
+        <h3 style="margin-top: 20px; font-weight: 400;">Pobieranie punktów...</h3>
+    </div>
+
+    <div id="map"></div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script>
+        // Inicjalizacja mapy z widokiem na centrum Polski
+        const map = L.map('map').setView([51.9194, 19.1451], 6);
+
+        // Dodanie warstwy kafelków z OpenStreetMap
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+        }).addTo(map);
+
+        // Niestandardowa ikona markera w stylu InPost (żółta)
+        const inpostIcon = L.icon({
+            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-gold.png',
+            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+            shadowSize: [41, 41]
+        });
+
+        async function fetchPoints() {
+            try {
+                // Pobieramy 500 punktów z globalnego API dla lepszego efektu wizualnego
+                const response = await fetch('https://api-global-points.easypack24.net/v1/points?per_page=500');
+                if (!response.ok) throw new Error('Błąd sieci');
+                
+                const data = await response.json();
+                const items = data.items || [];
+                
+                // Dodajemy każdy punkt na mapę
+                items.forEach(point => {
+                    if (point.location && point.location.latitude && point.location.longitude) {
+                        const marker = L.marker([point.location.latitude, point.location.longitude], {icon: inpostIcon}).addTo(map);
+                        
+                        const address = point.address_details 
+                            ? `${point.address_details.street || ''} ${point.address_details.building_number || ''}, ${point.address_details.city || ''}`
+                            : (point.address ? `${point.address.line1}, ${point.address.line2}` : 'Brak dokładnego adresu');
+
+                        marker.bindPopup(`
+                            <div class="popup-title">${point.name}</div>
+                            <div class="popup-desc">${address}</div>
+                            <div style="font-size: 0.85rem; color: #888;">
+                                Typ: ${point.type ? point.type.join(', ') : 'Inne'}<br>
+                                Status: <span style="color: green;">${point.status}</span>
+                            </div>
+                        `);
+                    }
+                });
+
+                document.getElementById('stats').innerText = `Wyświetlono ${items.length} punktów`;
+                
+                // Ukrycie ekranu ładowania
+                document.getElementById('loading').classList.add('hidden');
+                
+            } catch (error) {
+                console.error('Błąd pobierania punktów:', error);
+                document.getElementById('loading').innerHTML = '<h3 style="color: red; font-weight: 400;">Błąd pobierania danych z API.<br>Spróbuj odświeżyć stronę.</h3>';
+                document.getElementById('stats').innerText = 'Błąd pobierania';
+            }
+        }
+
+        // Uruchomienie pobierania punktów
+        fetchPoints();
+    </script>
+</body>
+</html>
