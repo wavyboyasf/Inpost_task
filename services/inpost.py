@@ -160,4 +160,9 @@ def simplify_locker(locker: dict) -> dict:
         "easy_access_zone": locker.get("easy_access_zone"),
         "has_alternatives": len(alternatives) > 0,
         "alternatives_count": len(alternatives),
+        "image_url": locker.get("image_url"),
+        "opening_hours": locker.get("opening_hours"),
+        "is_247": locker.get("location_247", False),
+        "air_index_level": locker.get("air_index_level"),
+        "location_type": locker.get("location_type"),
     }

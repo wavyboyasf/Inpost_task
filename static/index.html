@@ -18,6 +18,7 @@
             --text-secondary: #a0aec0;
             --accent-green: #48bb78;
             --accent-red: #fc8181;
+            --accent-blue: #63b3ed;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -33,8 +34,8 @@
 
         /* ── Side Panel ─────────────────────────────── */
         #panel {
-            width: 400px;
-            min-width: 400px;
+            width: 420px;
+            min-width: 420px;
             background: var(--panel-bg);
             display: flex;
             flex-direction: column;
@@ -43,9 +44,7 @@
             z-index: 1000;
         }
 
-        #panel.collapsed {
-            margin-left: -400px;
-        }
+        #panel.collapsed { margin-left: -420px; }
 
         .panel-header {
             padding: 20px 24px;
@@ -124,11 +123,11 @@
         .alt-card {
             background: var(--card-bg);
             border-radius: 12px;
-            padding: 14px 16px;
             margin-bottom: 10px;
             cursor: pointer;
             transition: all 0.2s ease;
             border-left: 4px solid var(--accent-green);
+            overflow: hidden;
         }
 
         .alt-card:hover {
@@ -137,39 +136,111 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
 
-        .alt-card .alt-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        .alt-card-body { padding: 14px 16px; }
+
+        /* ── Locker photo ──────────────────────────── */
+        .alt-photo {
+            width: 100%;
+            height: 110px;
+            object-fit: cover;
+            display: block;
+            background: #0a1628;
         }
 
-        .alt-card .alt-name {
+        .alt-photo-placeholder {
+            width: 100%;
+            height: 60px;
+            background: linear-gradient(135deg, #0a1628 0%, #0f3460 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: rgba(255,255,255,0.15);
+        }
+
+        /* ── Card header row ───────────────────────── */
+        .alt-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 8px;
+        }
+
+        .alt-name {
             font-weight: 600;
             font-size: 0.95rem;
         }
 
-        .alt-card .alt-time {
+        .alt-time {
             background: var(--accent-green);
             color: #000;
-            font-size: 0.75rem;
+            font-size: 0.72rem;
             font-weight: 700;
-            padding: 3px 10px;
+            padding: 3px 9px;
             border-radius: 20px;
+            white-space: nowrap;
+            flex-shrink: 0;
         }
 
-        .alt-card .alt-address {
+        .alt-address {
             font-size: 0.8rem;
             color: var(--text-secondary);
             margin-top: 4px;
         }
 
-        .alt-card .alt-distance {
+        .alt-distance {
             font-size: 0.75rem;
             color: var(--text-secondary);
             margin-top: 2px;
         }
 
-        /* ── No alternatives message ───────────────── */
+        /* ── Badge row ─────────────────────────────── */
+        .badge-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-top: 8px;
+        }
+
+        .pill {
+            font-size: 0.68rem;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 20px;
+        }
+
+        .pill-green  { background: rgba(72,187,120,0.18); color: var(--accent-green); border: 1px solid rgba(72,187,120,0.3); }
+        .pill-yellow { background: rgba(255,204,0,0.15);  color: var(--inpost-yellow); border: 1px solid rgba(255,204,0,0.3); }
+        .pill-blue   { background: rgba(99,179,237,0.15); color: var(--accent-blue);  border: 1px solid rgba(99,179,237,0.3); }
+        .pill-red    { background: rgba(252,129,129,0.15); color: var(--accent-red);  border: 1px solid rgba(252,129,129,0.3); }
+        .pill-gray   { background: rgba(160,174,192,0.12); color: var(--text-secondary); border: 1px solid rgba(160,174,192,0.2); }
+
+        /* ── Convenience score bar ─────────────────── */
+        .score-bar-wrap {
+            margin-top: 8px;
+        }
+
+        .score-label {
+            font-size: 0.68rem;
+            color: var(--text-secondary);
+            margin-bottom: 3px;
+        }
+
+        .score-bar-bg {
+            background: rgba(255,255,255,0.07);
+            border-radius: 4px;
+            height: 4px;
+            overflow: hidden;
+        }
+
+        .score-bar-fill {
+            height: 100%;
+            border-radius: 4px;
+            background: linear-gradient(90deg, var(--accent-green), var(--inpost-yellow));
+            transition: width 0.4s ease;
+        }
+
+        /* ── No alternatives / error ───────────────── */
         .no-alternatives {
             text-align: center;
             padding: 32px 16px;
@@ -179,14 +250,10 @@
         .no-alternatives .icon { font-size: 2rem; margin-bottom: 8px; }
 
         /* ── Loading ───────────────────────────────── */
-        .loading {
-            text-align: center;
-            padding: 40px 16px;
-        }
+        .loading { text-align: center; padding: 40px 16px; }
 
         .spinner {
-            width: 36px;
-            height: 36px;
+            width: 36px; height: 36px;
             border: 4px solid rgba(255,255,255,0.1);
             border-top-color: var(--inpost-yellow);
             border-radius: 50%;
@@ -197,98 +264,56 @@
         @keyframes spin { to { transform: rotate(360deg); } }
 
         /* ── Welcome state ─────────────────────────── */
-        .welcome {
-            text-align: center;
-            padding: 48px 24px;
-            color: var(--text-secondary);
-        }
-
+        .welcome { text-align: center; padding: 48px 24px; color: var(--text-secondary); }
         .welcome .icon { font-size: 3rem; margin-bottom: 16px; }
+        .welcome h3 { color: var(--text-primary); margin-bottom: 8px; }
 
-        .welcome h3 {
-            color: var(--text-primary);
-            margin-bottom: 8px;
-        }
+        /* ── Map ───────────────────────────────────── */
+        #map { flex: 1; height: 100vh; }
 
-        /* ── Map Container ─────────────────────────── */
-        #map {
-            flex: 1;
-            height: 100vh;
-        }
-
-        /* ── Toggle Button ─────────────────────────── */
+        /* ── Toggle ────────────────────────────────── */
         #toggle-panel {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            z-index: 1001;
-            background: var(--panel-bg);
-            color: var(--text-primary);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 8px;
-            padding: 8px 12px;
-            cursor: pointer;
-            font-family: 'Inter', sans-serif;
-            font-size: 0.85rem;
-            display: none;
+            position: absolute; top: 10px; left: 10px; z-index: 1001;
+            background: var(--panel-bg); color: var(--text-primary);
+            border: 1px solid rgba(255,255,255,0.1); border-radius: 8px;
+            padding: 8px 12px; cursor: pointer;
+            font-family: 'Inter', sans-serif; font-size: 0.85rem; display: none;
         }
 
         /* ── Stats Bar ─────────────────────────────── */
         .stats-bar {
             padding: 12px 24px;
             border-top: 1px solid rgba(255,255,255,0.06);
-            font-size: 0.75rem;
-            color: var(--text-secondary);
-            display: flex;
-            justify-content: space-between;
+            font-size: 0.75rem; color: var(--text-secondary);
+            display: flex; justify-content: space-between;
         }
 
         /* ── Leaflet popup override ────────────────── */
         .leaflet-popup-content-wrapper {
-            background: var(--card-bg) !important;
-            color: var(--text-primary) !important;
-            border-radius: 10px !important;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.4) !important;
+            background: var(--card-bg) !important; color: var(--text-primary) !important;
+            border-radius: 10px !important; box-shadow: 0 8px 24px rgba(0,0,0,0.4) !important;
         }
-
         .leaflet-popup-tip { background: var(--card-bg) !important; }
-
         .leaflet-popup-content { margin: 12px 16px !important; font-family: 'Inter', sans-serif !important; }
 
-        /* Override marker cluster styles */
         .marker-cluster-small,
         .marker-cluster-medium,
-        .marker-cluster-large {
-            background-color: rgba(255, 204, 0, 0.25) !important;
-        }
-
+        .marker-cluster-large { background-color: rgba(255,204,0,0.25) !important; }
         .marker-cluster-small div,
         .marker-cluster-medium div,
         .marker-cluster-large div {
-            background-color: var(--inpost-yellow) !important;
-            color: #000 !important;
-            font-weight: 700 !important;
-            font-family: 'Inter', sans-serif !important;
+            background-color: var(--inpost-yellow) !important; color: #000 !important;
+            font-weight: 700 !important; font-family: 'Inter', sans-serif !important;
         }
 
-        /* ── Responsive ────────────────────────────── */
         @media (max-width: 768px) {
             #panel {
-                position: absolute;
-                bottom: 0;
-                left: 0;
-                right: 0;
-                width: 100%;
-                min-width: 100%;
-                height: 50vh;
-                border-right: none;
-                border-top: 1px solid rgba(255,255,255,0.1);
-                border-radius: 16px 16px 0 0;
-                transition: transform 0.3s ease;
+                position: absolute; bottom: 0; left: 0; right: 0;
+                width: 100%; min-width: 100%; height: 55vh;
+                border-right: none; border-top: 1px solid rgba(255,255,255,0.1);
+                border-radius: 16px 16px 0 0; transition: transform 0.3s ease;
             }
-
             #panel.collapsed { transform: translateY(100%); margin-left: 0; }
-
             #toggle-panel { display: block; }
         }
     </style>
@@ -314,7 +339,7 @@
 
     <div class="stats-bar">
         <span id="stats-count">Loading lockers...</span>
-        <span>Data: InPost API</span>
+        <span>InPost API + OSM Overpass</span>
     </div>
 </div>
 
@@ -326,9 +351,7 @@
 <script>
     // ── Map Setup ──────────────────────────────────────────────────
     const map = L.map('map', { zoomControl: false }).setView([52.23, 21.01], 12);
-
     L.control.zoom({ position: 'topright' }).addTo(map);
-
     L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
         maxZoom: 19,
         attribution: '&copy; <a href="https://carto.com/">CARTO</a> &copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>'
@@ -338,32 +361,22 @@
     function createIcon(color) {
         return L.divIcon({
             className: 'custom-marker',
-            html: `<div style="
-                width: 14px; height: 14px;
-                background: ${color};
-                border: 2px solid rgba(0,0,0,0.3);
-                border-radius: 50%;
-                box-shadow: 0 0 8px ${color}88;
-            "></div>`,
-            iconSize: [14, 14],
-            iconAnchor: [7, 7],
+            html: `<div style="width:14px;height:14px;background:${color};border:2px solid rgba(0,0,0,0.3);border-radius:50%;box-shadow:0 0 8px ${color}88;"></div>`,
+            iconSize: [14, 14], iconAnchor: [7, 7],
         });
     }
 
-    const defaultIcon = createIcon('#ffcc00');
+    const defaultIcon  = createIcon('#ffcc00');
     const selectedIcon = createIcon('#fc8181');
-    const altIcon = createIcon('#48bb78');
+    const altIcon      = createIcon('#48bb78');
 
     // ── State ──────────────────────────────────────────────────────
-    let allMarkers = {};          // name -> marker
-    let routeLayers = [];         // currently drawn route polylines
-    let selectedMarker = null;    // currently highlighted marker
+    let allMarkers    = {};
+    let routeLayers   = [];
+    let selectedMarker = null;
 
-    // ── Marker Cluster Group ───────────────────────────────────────
     const clusterGroup = L.markerClusterGroup({
-        maxClusterRadius: 50,
-        spiderfyOnMaxZoom: true,
-        showCoverageOnHover: false,
+        maxClusterRadius: 50, spiderfyOnMaxZoom: true, showCoverageOnHover: false,
     });
     map.addLayer(clusterGroup);
 
@@ -375,13 +388,12 @@
 
             data.lockers.forEach(locker => {
                 const marker = L.marker([locker.lat, locker.lon], { icon: defaultIcon });
-
                 marker.bindPopup(`
                     <strong style="color:#ffcc00;">${locker.name}</strong><br>
                     <span style="font-size:0.85rem;">${locker.address}, ${locker.city}</span><br>
-                    <span style="font-size:0.8rem; color:#a0aec0;">${locker.location_description || ''}</span>
+                    <span style="font-size:0.8rem;color:#a0aec0;">${locker.location_description || ''}</span>
+                    ${locker.is_247 ? '<br><span style="font-size:0.75rem;color:#48bb78;">⏰ Czynny 24/7</span>' : ''}
                 `);
-
                 marker.on('click', () => selectLocker(locker.name, marker));
                 clusterGroup.addLayer(marker);
                 allMarkers[locker.name] = marker;
@@ -389,7 +401,6 @@
 
             document.getElementById('stats-count').textContent =
                 `${data.count} lockers in Warsaw`;
-
         } catch (err) {
             console.error('Failed to load lockers:', err);
             document.getElementById('stats-count').textContent = 'Error loading data';
@@ -399,89 +410,119 @@
     // ── Select Locker ──────────────────────────────────────────────
     async function selectLocker(name, marker) {
         const panel = document.getElementById('panel-content');
-
-        // Reset previous selection
         clearRoutes();
         if (selectedMarker) selectedMarker.setIcon(defaultIcon);
         marker.setIcon(selectedIcon);
         selectedMarker = marker;
 
-        // Show loading
         panel.innerHTML = `
             <div class="loading">
                 <div class="spinner"></div>
                 <p>Searching for quieter alternatives...</p>
-            </div>
-        `;
+                <p style="font-size:0.75rem;color:#a0aec0;margin-top:6px;">Fetching transit data from OpenStreetMap…</p>
+            </div>`;
 
         try {
             const resp = await fetch(`/api/alternatives/${name}`);
             const data = await resp.json();
-
             renderAlternatives(data);
-
         } catch (err) {
-            panel.innerHTML = `
-                <div class="no-alternatives">
-                    <div class="icon">⚠️</div>
-                    <p>Error loading alternatives. Try again.</p>
-                </div>
-            `;
+            panel.innerHTML = `<div class="no-alternatives"><div class="icon">⚠️</div><p>Error loading alternatives. Try again.</p></div>`;
         }
+    }
+
+    // ── Helpers ────────────────────────────────────────────────────
+    const AIR_LABELS = {
+        VERY_GOOD: { label: 'Powietrze: b. dobre', cls: 'pill-green' },
+        GOOD:      { label: 'Powietrze: dobre',    cls: 'pill-green' },
+        MODERATE:  { label: 'Powietrze: średnie',  cls: 'pill-yellow' },
+        BAD:       { label: 'Powietrze: złe',      cls: 'pill-red' },
+        VERY_BAD:  { label: 'Powietrze: b. złe',   cls: 'pill-red' },
+    };
+
+    function buildBadges(alt) {
+        const pills = [];
+
+        if (alt.is_247)
+            pills.push(`<span class="pill pill-green">⏰ 24/7</span>`);
+        else if (alt.opening_hours)
+            pills.push(`<span class="pill pill-yellow">🕐 ${alt.opening_hours}</span>`);
+
+        if (alt.location_type === 'Indoor')
+            pills.push(`<span class="pill pill-blue">🏢 Indoor</span>`);
+        else if (alt.location_type === 'Outdoor')
+            pills.push(`<span class="pill pill-gray">🌤 Outdoor</span>`);
+
+        if (alt.transit_stops > 0) {
+            const cls = alt.transit_stops >= 3 ? 'pill-blue' : 'pill-gray';
+            pills.push(`<span class="pill ${cls}">🚌 ${alt.transit_stops} przyst.</span>`);
+        }
+
+        if (alt.air_index_level && AIR_LABELS[alt.air_index_level]) {
+            const a = AIR_LABELS[alt.air_index_level];
+            pills.push(`<span class="pill ${a.cls}">💨 ${a.label}</span>`);
+        }
+
+        return pills.length ? `<div class="badge-row">${pills.join('')}</div>` : '';
+    }
+
+    function buildScoreBar(alt) {
+        // Normalize convenience_score to a 0-100 bar (0 min = 100%, 10 min = 0%)
+        const score = alt.convenience_score ?? alt.walking_time_min ?? 10;
+        const pct = Math.max(0, Math.round((1 - score / 10) * 100));
+        return `
+            <div class="score-bar-wrap">
+                <div class="score-label">Wygoda dojścia: ${pct}%</div>
+                <div class="score-bar-bg"><div class="score-bar-fill" style="width:${pct}%"></div></div>
+            </div>`;
     }
 
     // ── Render Alternatives Panel ──────────────────────────────────
     function renderAlternatives(data) {
         const panel = document.getElementById('panel-content');
-        const sel = data.selected;
-        const alts = data.alternatives;
+        const sel   = data.selected;
+        const alts  = data.alternatives;
 
         let html = `
             <div class="selected-card">
                 <div class="locker-name">${sel.name}</div>
                 <div class="locker-address">${sel.address}, ${sel.city} ${sel.post_code}</div>
                 ${sel.location_description ? `<div class="locker-desc">${sel.location_description}</div>` : ''}
-            </div>
-        `;
+                <div class="badge-row" style="margin-top:8px;">
+                    ${sel.is_247 ? '<span class="pill pill-green">⏰ 24/7</span>' : (sel.opening_hours ? `<span class="pill pill-yellow">🕐 ${sel.opening_hours}</span>` : '')}
+                    ${sel.location_type === 'Indoor' ? '<span class="pill pill-blue">🏢 Indoor</span>' : ''}
+                </div>
+            </div>`;
 
         if (alts.length === 0) {
-            html += `
-                <div class="no-alternatives">
-                    <div class="icon">✅</div>
-                    <p>${data.message || 'No alternatives found.'}</p>
-                </div>
-            `;
+            html += `<div class="no-alternatives"><div class="icon">✅</div><p>${data.message || 'No alternatives within 10 min walk.'}</p></div>`;
         } else {
-            html += `<div class="section-title">🟢 Quieter alternatives (${alts.length})</div>`;
+            html += `<div class="section-title">🟢 Quieter alternatives nearby (${alts.length})</div>`;
 
             alts.forEach((alt, i) => {
-                const timeLabel = alt.walking_time_min
-                    ? `${alt.walking_time_min} min`
-                    : '?';
-                const distLabel = alt.walking_distance_m
-                    ? `${alt.walking_distance_m} m walking distance`
-                    : '';
+                const timeLabel = alt.walking_time_min ? `🚶 ${alt.walking_time_min} min` : '?';
+                const distLabel = alt.walking_distance_m ? `~${alt.walking_distance_m} m pieszo` : '';
+                const photo = alt.image_url
+                    ? `<img class="alt-photo" src="${alt.image_url}" alt="${alt.name}" loading="lazy" onerror="this.parentElement.removeChild(this)">`
+                    : `<div class="alt-photo-placeholder">📦</div>`;
 
                 html += `
                     <div class="alt-card" onclick="focusAlternative('${alt.name}', ${i})">
-                        <div class="alt-header">
-                            <span class="alt-name">${alt.name}</span>
-                            <span class="alt-time">🚶 ${timeLabel}</span>
+                        ${photo}
+                        <div class="alt-card-body">
+                            <div class="alt-header">
+                                <span class="alt-name">${alt.name}</span>
+                                <span class="alt-time">${timeLabel}</span>
+                            </div>
+                            <div class="alt-address">${alt.address}${alt.city ? ', ' + alt.city : ''}</div>
+                            ${distLabel ? `<div class="alt-distance">${distLabel}</div>` : ''}
+                            ${buildBadges(alt)}
+                            ${buildScoreBar(alt)}
                         </div>
-                        <div class="alt-address">${alt.address}, ${alt.city || ''}</div>
-                        ${distLabel ? `<div class="alt-distance">${distLabel}</div>` : ''}
-                    </div>
-                `;
+                    </div>`;
 
-                // Draw route on map
-                if (alt.route_geometry) {
-                    drawRoute(alt.route_geometry, i);
-                }
-
-                // Show alternative marker in green
-                if (allMarkers[alt.name]) {
-                    allMarkers[alt.name].setIcon(altIcon);
-                }
+                if (alt.route_geometry) drawRoute(alt.route_geometry);
+                if (allMarkers[alt.name]) allMarkers[alt.name].setIcon(altIcon);
             });
         }
 
@@ -489,16 +530,11 @@
     }
 
     // ── Draw Route Polyline ────────────────────────────────────────
-    function drawRoute(geometry, index) {
-        // GeoJSON coordinates are [lon, lat], Leaflet needs [lat, lon]
-        const coords = geometry.coordinates.map(c => [c[1], c[0]]);
+    function drawRoute(geometry) {
+        const coords   = geometry.coordinates.map(c => [c[1], c[0]]);
         const polyline = L.polyline(coords, {
-            color: '#48bb78',
-            weight: 4,
-            opacity: 0.7,
-            dashArray: '8, 8',
+            color: '#48bb78', weight: 4, opacity: 0.7, dashArray: '8, 8',
         }).addTo(map);
-
         routeLayers.push(polyline);
     }
 
@@ -506,26 +542,19 @@
     function clearRoutes() {
         routeLayers.forEach(l => map.removeLayer(l));
         routeLayers = [];
-
-        // Reset all markers to default
         Object.values(allMarkers).forEach(m => m.setIcon(defaultIcon));
     }
 
     // ── Focus on Alternative ───────────────────────────────────────
-    function focusAlternative(name, index) {
+    function focusAlternative(name) {
         const marker = allMarkers[name];
-        if (marker) {
-            map.setView(marker.getLatLng(), 16);
-            marker.openPopup();
-        }
+        if (marker) { map.setView(marker.getLatLng(), 16); marker.openPopup(); }
     }
 
-    // ── Toggle Panel (mobile) ──────────────────────────────────────
     function togglePanel() {
         document.getElementById('panel').classList.toggle('collapsed');
     }
 
-    // ── Init ───────────────────────────────────────────────────────
     loadLockers();
 </script>
 </body>
